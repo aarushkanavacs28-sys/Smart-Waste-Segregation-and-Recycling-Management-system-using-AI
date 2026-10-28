@@ -1,0 +1,17 @@
+{
+  "run_name": "resnet50_baseline_v2",
+  "model": "resnet50",
+  "device": "cuda",
+  "classes": [
+    "glass",
+    "metal",
+    "miscellaneous_trash",
+    "organic",
+    "paper_cardboard",
+    "plastic"
+  ],
+  "degradation_aware": false,
+  "best_val_macro_f1": 0.9524329871210048,
+  "parameters": 23520326,
+  "model_state_size_mb": 90.02898120880127
+}

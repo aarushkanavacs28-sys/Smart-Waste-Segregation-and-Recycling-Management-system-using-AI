@@ -1,0 +1,17 @@
+{
+  "run_name": "efficientnet_b0_baseline_v2",
+  "model": "efficientnet_b0",
+  "device": "cuda",
+  "classes": [
+    "glass",
+    "metal",
+    "miscellaneous_trash",
+    "organic",
+    "paper_cardboard",
+    "plastic"
+  ],
+  "degradation_aware": false,
+  "best_val_macro_f1": 0.9616200343507545,
+  "parameters": 4015234,
+  "model_state_size_mb": 15.604626655578613
+}

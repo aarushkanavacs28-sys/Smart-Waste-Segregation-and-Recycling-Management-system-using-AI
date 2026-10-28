@@ -1,0 +1,17 @@
+{
+  "run_name": "robustwaste_r50_v2",
+  "model": "resnet50",
+  "device": "cuda",
+  "classes": [
+    "glass",
+    "metal",
+    "miscellaneous_trash",
+    "organic",
+    "paper_cardboard",
+    "plastic"
+  ],
+  "degradation_aware": true,
+  "best_val_macro_f1": 0.9526711387268877,
+  "parameters": 23520326,
+  "model_state_size_mb": 90.02898120880127
+}
