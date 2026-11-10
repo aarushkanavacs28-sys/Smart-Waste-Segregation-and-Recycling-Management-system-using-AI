@@ -1,0 +1,17 @@
+{
+  "run_name": "robustwaste_proposed_trashnet",
+  "model": "mobilenet_v3_large",
+  "device": "cuda",
+  "classes": [
+    "cardboard",
+    "glass",
+    "metal",
+    "paper",
+    "plastic",
+    "trash"
+  ],
+  "degradation_aware": true,
+  "best_val_macro_f1": 0.937570977354259,
+  "parameters": 4209718,
+  "model_state_size_mb": 16.25744342803955
+}

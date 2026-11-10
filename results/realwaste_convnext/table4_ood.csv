@@ -1,0 +1,2 @@
+model,ood_samples,threshold,mean_confidence,reject_rate,wrongly_accepted
+RobustWaste-ConvNeXt (accuracy variant),318,0.5,0.8142327901514821,0.05345911949685535,301

@@ -1,0 +1,2 @@
+model,accuracy,macro_precision,macro_recall,macro_f1,parameters,model_size_mb,cpu_latency_ms
+RobustWaste-ConvNeXt (accuracy variant),0.9654654654654654,0.9631891772546037,0.9636501931024606,0.9633666643625279,27824742,106.20817470550537,196.1930564333367

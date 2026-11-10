@@ -1,0 +1,14 @@
+# data and training outputs (re-created by the scripts)
+data/
+outputs/
+
+# model files: ignore all, keep only the small one in models/
+*.pt
+!models/*.pt
+
+# python / colab
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+*.zip
+.DS_Store

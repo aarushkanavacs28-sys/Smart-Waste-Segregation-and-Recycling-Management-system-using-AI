@@ -46,6 +46,20 @@ DEFAULT_RUNS = {
 }
 
 
+class Ensemble(torch.nn.Module):
+    """Averages the class probabilities of several models (for example the same network
+    trained with different random seeds). It returns log-probabilities, so applying
+    softmax to its output gives back exactly the averaged probabilities."""
+
+    def __init__(self, members):
+        super().__init__()
+        self.members = torch.nn.ModuleList(members)
+
+    def forward(self, x):
+        probs = torch.stack([torch.softmax(m(x), dim=1) for m in self.members]).mean(dim=0)
+        return torch.log(probs.clamp_min(1e-8))
+
+
 def batch_probs(model, x, tta):
     """Class probabilities for a batch. With TTA the image and its mirror image are
     both classified and the two probability vectors are averaged (2x inference cost)."""
@@ -128,6 +142,8 @@ def main():
     ap.add_argument("--tta", action="store_true")
     # Extra model variants to include in every table, written as "label=run_name".
     # Example: --extra "RobustWaste-R50 (accuracy variant)=robustwaste_r50"
+    # Ensemble: list several runs separated by commas (probabilities are averaged):
+    #   --extra "RobustWaste-Ens3=robustwaste_proposed,robustwaste_proposed_s1,robustwaste_proposed_s2"
     ap.add_argument("--extra", nargs="*", default=[])
     args = ap.parse_args()
 
@@ -144,13 +160,24 @@ def main():
         runs[label_x.strip()] = run_x.strip()
 
     for label, run in runs.items():
-        ckpt_path = Path(args.outputs_dir) / f"{run}{args.suffix}" / "best.pt"
-        if not ckpt_path.exists():
-            print(f"[skip] {label}: {ckpt_path} not found (train it first)")
+        # a run entry may list several comma-separated runs -> they form an ensemble
+        paths = [Path(args.outputs_dir) / f"{r.strip()}{args.suffix}" / "best.pt"
+                 for r in run.split(",")]
+        missing = [p for p in paths if not p.exists()]
+        if missing:
+            print(f"[skip] {label}: {missing[0]} not found (train it first)")
             continue
 
         print(f"\n=== {label} ===")
-        model, ckpt = load_model_from_checkpoint(str(ckpt_path), device)
+        loaded = [load_model_from_checkpoint(str(p), device) for p in paths]
+        ckpt = loaded[0][1]
+        if any(k[1]["classes"] != ckpt["classes"] or k[1]["image_size"] != ckpt["image_size"]
+               for k in loaded):
+            raise RuntimeError(f"{label}: ensemble members must share classes and image size.")
+        if len(loaded) == 1:
+            model = loaded[0][0]
+        else:
+            model = Ensemble([m for m, _ in loaded]).to(device).eval()
         size = ckpt["image_size"]
         classes = ckpt["classes"]
         cache[label] = {}

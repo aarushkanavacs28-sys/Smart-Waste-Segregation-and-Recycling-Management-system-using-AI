@@ -60,6 +60,8 @@ def main():
             "resnet50",
             "efficientnet_b0",
             "mobilenet_v3_large",
+            "convnext_tiny",
+            "efficientnet_v2_s",
         ],
     )
     parser.add_argument("--run-name", required=True)

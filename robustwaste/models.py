@@ -9,10 +9,20 @@ from torchvision.models import (
     EfficientNet_B0_Weights,
     mobilenet_v3_large,
     MobileNet_V3_Large_Weights,
+    convnext_tiny,
+    ConvNeXt_Tiny_Weights,
+    efficientnet_v2_s,
+    EfficientNet_V2_S_Weights,
 )
 
 
-SUPPORTED_MODELS = ["resnet50", "efficientnet_b0", "mobilenet_v3_large"]
+SUPPORTED_MODELS = [
+    "resnet50",
+    "efficientnet_b0",
+    "mobilenet_v3_large",
+    "convnext_tiny",       # stronger, heavier (about 28 M parameters)
+    "efficientnet_v2_s",   # stronger, heavier (about 21 M parameters)
+]
 
 
 def build_model(
@@ -38,6 +48,20 @@ def build_model(
     if name == "mobilenet_v3_large":
         weights = MobileNet_V3_Large_Weights.DEFAULT if pretrained else None
         model = mobilenet_v3_large(weights=weights)
+        in_features = model.classifier[-1].in_features
+        model.classifier[-1] = nn.Linear(in_features, num_classes)
+        return model
+
+    if name == "convnext_tiny":
+        weights = ConvNeXt_Tiny_Weights.DEFAULT if pretrained else None
+        model = convnext_tiny(weights=weights)
+        in_features = model.classifier[-1].in_features      # last layer of the classifier
+        model.classifier[-1] = nn.Linear(in_features, num_classes)
+        return model
+
+    if name == "efficientnet_v2_s":
+        weights = EfficientNet_V2_S_Weights.DEFAULT if pretrained else None
+        model = efficientnet_v2_s(weights=weights)
         in_features = model.classifier[-1].in_features
         model.classifier[-1] = nn.Linear(in_features, num_classes)
         return model

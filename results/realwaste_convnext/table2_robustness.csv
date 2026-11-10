@@ -1,0 +1,6 @@
+model,condition,accuracy,macro_f1,accuracy_drop_vs_normal
+RobustWaste-ConvNeXt (accuracy variant),normal,0.9654654654654654,0.9633666643625279,0.0
+RobustWaste-ConvNeXt (accuracy variant),low_light,0.963963963963964,0.962077788090374,0.0015015015015014122
+RobustWaste-ConvNeXt (accuracy variant),blur,0.9534534534534534,0.951901541470439,0.012012012012011963
+RobustWaste-ConvNeXt (accuracy variant),noise,0.9519519519519519,0.9499989313766043,0.013513513513513487
+RobustWaste-ConvNeXt (accuracy variant),occlusion,0.9579579579579579,0.9555656979065653,0.007507507507507505

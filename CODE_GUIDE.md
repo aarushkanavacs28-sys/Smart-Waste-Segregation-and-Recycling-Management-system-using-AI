@@ -151,3 +151,21 @@ Rules: pick settings by VALIDATION score only, never by looking at the test set;
 
 `compare.py --extra "label=run_name"` adds more model variants (for example a degradation-aware ResNet50 as an
 "accuracy variant") to every table, next to the four standard models. The `--suffix` is added to the run name as usual.
+
+---
+
+## Added in v7 (ensemble)
+
+`compare.py --extra "label=run1,run2,run3"` now accepts several comma-separated runs. Their predicted probabilities are
+averaged (an ensemble). Train the same model with different seeds (`train.py --seed 1`, `--seed 2`, ...) and list the runs.
+The ensemble is slower (about 3x for 3 members), so report its latency, and decide the number of members in advance
+(do not pick members by looking at the test set).
+
+---
+
+## Added in v8 (stronger backbones)
+
+`train.py --model convnext_tiny` and `--model efficientnet_v2_s` are now available. They are heavier than MobileNetV3
+(not edge models) and are meant as "accuracy variants" of the same framework. For ConvNeXt use a smaller learning rate
+(`--lr 1e-4`), and `--batch-size 16` if the GPU runs out of memory. Add them to the tables with
+`compare.py --extra "label=run_name"`.

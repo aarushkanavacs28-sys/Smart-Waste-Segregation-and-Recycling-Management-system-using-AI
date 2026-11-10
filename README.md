@@ -6,6 +6,58 @@ Reference implementation for the proposed conference work:
 
 This project is software-first. No physical waste-bin hardware or sensors are required for the main experiments.
 
+## Results at a glance
+
+Test accuracy on RealWaste (666 test images, 6 classes, seed 42). All models use the same split and settings
+(288 px, label smoothing 0.1, up to 40 epochs, patience 12).
+
+| Model | Clean accuracy | Mean accuracy under 4 degradations |
+|---|---|---|
+| **RobustWaste (MobileNetV3-Large, degradation-aware), main run** | **96.10%** | 95.4% |
+| Same configuration, repeat run | 95.35% | see `results/realwaste_repeat_and_ensemble` |
+| 3-seed ensemble of the above | 95.80% | see `results/realwaste_repeat_and_ensemble` |
+| RobustWaste with ConvNeXt-Tiny (heavier accuracy variant) | 96.55% | 95.7% |
+| EfficientNet-B0 | 95.95% | 76.1% |
+| ResNet50 | 95.35% | 84.5% |
+| MobileNetV3-Large, normal training | 95.05% | 89.9% |
+
+Main findings: degradation-aware training keeps accuracy within about 1.7 points of the clean result under low light,
+blur, noise and occlusion, while conventionally trained models lose up to 44 points. The lightweight model is about
+5.5x smaller and 6.6x faster on CPU than ResNet50. Retraining the same configuration changes accuracy by about
+0.75 points, so differences below one point are within run-to-run noise. Unseen textile waste is mostly accepted by
+every model (only 5-14% rejected), which is reported as a limitation.
+
+TrashNet (758 test images, 63/7/30 split as in Rajakumaran et al.): proposed 94.20%, reproduced ResNet50 94.33%.
+
+## Repository layout
+
+| Folder / file | Content |
+|---|---|
+| `robustwaste/` | Model, training, evaluation, robustness, reject threshold, comparison and IoT code |
+| `scripts/` | Dataset download and preparation (RealWaste, TrashNet) |
+| `dashboard/` | Streamlit dashboard for the MQTT events |
+| `results/` | Result tables (CSV), figures and training logs of the final runs |
+| `models/` | Trained lightweight proposed model (`robustwaste_mobilenetv3_proposed.pt`, about 16 MB) |
+| `docs/` | Comparative analysis and proposed-work document |
+| `CODE_GUIDE.md` | Plain-language explanation of every file and option |
+
+Datasets are not included; the scripts download them. The ConvNeXt weights (106 MB) are too large for the repository
+and are not included; add a release link here if you publish them.
+
+Quick demo with the included model:
+
+```bash
+python -m robustwaste.infer --checkpoint models/robustwaste_mobilenetv3_proposed.pt --image path/to/photo.jpg --threshold 0.5
+```
+
+Note: the 96.10% main-run model file was not saved. The included model is a retrained copy with the same
+configuration (test accuracy 95.35%). The tables in `results/realwaste_main_run` belong to the 96.10% run.
+
+## Data sources
+
+- RealWaste: Single, Iranmanesh and Raad, *Information* 14(12):633, 2023 (UCI Machine Learning Repository).
+- TrashNet: Thung and Yang, Stanford CS229 project, 2016.
+
 ## Implemented pipeline
 
 - Automatic RealWaste download helper
@@ -413,3 +465,13 @@ python -m robustwaste.compare --data-dir data/processed --outputs-dir outputs --
 ```
 Train all four models with the same options and `_v2` run names so the comparison stays fair.
 Copy `outputs/comparison_v2` somewhere safe before running the `--tta` version, which overwrites it.
+
+### Ensemble of seeds (v7)
+
+```bash
+python -m robustwaste.train --data-dir data/processed --model mobilenet_v3_large --run-name robustwaste_proposed_v2    --seed 42 --epochs 40 --patience 12 --image-size 288 --label-smoothing 0.1 --degradation-aware
+python -m robustwaste.train --data-dir data/processed --model mobilenet_v3_large --run-name robustwaste_proposed_s1_v2 --seed 1  --epochs 40 --patience 12 --image-size 288 --label-smoothing 0.1 --degradation-aware
+python -m robustwaste.train --data-dir data/processed --model mobilenet_v3_large --run-name robustwaste_proposed_s2_v2 --seed 2  --epochs 40 --patience 12 --image-size 288 --label-smoothing 0.1 --degradation-aware
+python -m robustwaste.compare --data-dir data/processed --outputs-dir outputs --suffix _v2 \
+  --extra "RobustWaste-Ens3 (3 seeds)=robustwaste_proposed,robustwaste_proposed_s1,robustwaste_proposed_s2"
+```
